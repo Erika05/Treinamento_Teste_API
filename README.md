@@ -1,4 +1,4 @@
-# Treinamento_Teste_API
+- Treinamento_Teste_API
 
 *Pré-requisitos para Execução dos Testes
 Instalar o IntelliJ Community - MAC: https://www.jetbrains.com/idea/download/#section=mac ou 
