@@ -9,4 +9,5 @@
    - Criar variáveis de ambiente JAVA_HOME e MAVEN_HOME e informar seus respectivos caminhos (path).
 
 - Para execução do teste com sucesso é necessário gerar o token do seu usuário no sptify:
+
        --> https://developer.spotify.com/console/get-current-user-playlists/
