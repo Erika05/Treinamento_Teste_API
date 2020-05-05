@@ -3,7 +3,9 @@ import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
+import static  org.junit.Assert.assertThat;
+import static org.hamcrest.Matchers.*;
+import java.io.File;
 import java.util.ArrayList;
 
 import static io.restassured.RestAssured.given;
@@ -89,7 +91,57 @@ public class Musicas extends Helper {
         } else {
             System.out.println("Usuário não logado!");
         }
-}
+    }
+
+    @Test
+    public void adicionarMusicaArquivoJson() {
+        File json = new File("src/arquivosJson/adicionarMusica.json");
+        response = given()
+                .accept("application/json")
+                .contentType("application/json")
+                .header("Authorization", "Bearer " + token)
+                .body(json)
+                .when()
+                .post(URL + "/playlists/" + idPlayList + "/tracks")
+                .then()
+                .extract()
+                .response();
+        Assert.assertEquals(response.statusCode(), 201);
+        assertThat(response.statusCode(), anyOf (is(200), is(201)));
+    }
+
+    @Test
+    public void reordenaPlayList()
+    {
+        buscaMusicaRequest();
+        String idMusicaPrimeiraPosicao =  response.path("items[0].track.id");
+        String nomeMusicaPrimeiraPosicao = response.path("items[0].track.name");
+        String idMusicaSegundaPosicao = response.path("items[1].track.id");
+        String nomeMusicaSegundaPosica= response.path("items[1].track.name");
+        response = given()
+                .accept("application/json")
+                .contentType("application/json")
+                .header("Authorization" , "Bearer " + token)
+                .body("{\"range_start\":0,\"range_length\":1,\"insert_before\":2}")
+                .when()
+                .put(URL + "/playlists/"+ idPlayList +"/tracks")
+                .then()
+                .extract()
+                .response();
+        if(response.statusCode() != 401) {
+            Assert.assertEquals(response.statusCode(), 200);
+            buscaMusicaRequest();
+            Assert.assertEquals(idMusicaPrimeiraPosicao, response.path("items[1].track.id"));
+            Assert.assertEquals(nomeMusicaPrimeiraPosicao, response.path("items[1].track.name"));
+            Assert.assertEquals(idMusicaSegundaPosicao, response.path("items[0].track.id"));
+            Assert.assertEquals(nomeMusicaSegundaPosica, response.path("items[0].track.name"));
+        }
+        else
+        {
+            System.out.println("Usuário não está logado;");
+        }
+    }
+
 
     public Response adicionarMusicaResquest() {
         Response result;

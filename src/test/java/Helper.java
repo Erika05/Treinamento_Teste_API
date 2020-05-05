@@ -3,7 +3,7 @@ import io.restassured.response.Response;
 import java.util.ArrayList;
 
 public class Helper {
-    public static String token = "BQD667u5jpZPK1hvvhIlBoPpRCeSqKXYvqOgZDccDV1UUhp6WZo06TXyPecXBbbJftLI-j5uH3OZ_Hat_ZK5mzhCNOJrXDmnmU3opAjKg6Ozp5DmMdzhs3hUuiC-CCKHCYj9WobMsZ1MUoIFIGvrC6h06oqqZ30tysf27JSnsk-aftQCp9htPysvpN99acg1sNIKFqQMQ7_MvNAVr7aisTzd6BliwTBn2pm7JhmsK6RDcURvKOasM9dKyefN7BYFHX-XUStLMBHsVmfAiDMCn4PsvJQXb1Do6rQeIhfc";
+    public static String token = "BQDgvTQS1YPdWM5HJmlkniUv8F3gHQ7Uo7VQweHuJxm5KCCQLPRjqNooAkMnR7wvhz87QSsC0qxpUzgCbreITXupvTXSAggOSxqCz0I-Md0h1aACDUJgppa0ZpOYaUzHWxGVvYQ9LWcE2H1fbf7yw_1NaOyKdB6hR0yuCFagfFKpq25KUKJkc6MulH6qXSv1ypWx9dOGuoPZVn5bKg7PvaDLIYRyvj9JpzHwYKq-f6ugv4C6N1k4cBIRZburvdqoTkCp9xYWTkus2RO93UwvlZF-Wsj9KrCWIAAWhWxH";
     public static String URL = "https://api.spotify.com/v1";
     public static String nomePlayList = "Teste Postman";
     public static Response response;
