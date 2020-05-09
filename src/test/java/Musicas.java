@@ -2,9 +2,12 @@ import io.restassured.response.Response;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
-import static  org.junit.Assert.assertThat;
+
+import static org.junit.Assert.assertThat;
 import static org.hamcrest.Matchers.*;
+
 import java.io.File;
 import java.util.ArrayList;
 
@@ -16,6 +19,8 @@ public class Musicas extends Helper {
     String nomeMusica = "Dubwoofer Substep";
     PlayList playList = new PlayList();
     String nomeMusicaAdcionada = "Please Mister Postman - Remastered 2009";
+    String idMusicaAdicionar = "spotify:track:6wfK1R6FoLpmUA9lk5ll4T";
+    String idMusicaDelete = "spotify:track:6wfK1R6FoLpmUA9lk5ll4T";
 
     @BeforeClass
     public void buscaIdPlayList() {
@@ -61,7 +66,7 @@ public class Musicas extends Helper {
         Response result;
         buscaMusicaRequest();
         if (!verificaPorNome(nomeMusicaAdcionada)) {
-            result = adicionarMusicaResquest();
+            result = adicionarMusicaResquest(idMusicaAdicionar);
             if (result.statusCode() != 401) {
                 Assert.assertEquals(result.statusCode(), 201);
                 buscaMusicaRequest();
@@ -75,6 +80,7 @@ public class Musicas extends Helper {
     }
 
     @Test
+    @Ignore
     public void adicionaMusicaPlayListVerificacaoPorQuantidade()//Validação verificando a quantidade de música
     {
         Response result;
@@ -82,7 +88,7 @@ public class Musicas extends Helper {
         int qtdFinal;
         buscaMusicaRequest();
         qtdInicio = countMusicas(nomeMusicaAdcionada);
-        result = adicionarMusicaResquest();
+        result = adicionarMusicaResquest(idMusicaAdicionar);
         if (result.statusCode() != 401) {
             Assert.assertEquals(result.statusCode(), 201);
             buscaMusicaRequest();
@@ -94,6 +100,7 @@ public class Musicas extends Helper {
     }
 
     @Test
+    @Ignore
     public void adicionarMusicaArquivoJson() {
         File json = new File("src/arquivosJson/adicionarMusica.json");
         response = given()
@@ -107,54 +114,74 @@ public class Musicas extends Helper {
                 .extract()
                 .response();
         Assert.assertEquals(response.statusCode(), 201);
-        assertThat(response.statusCode(), anyOf (is(200), is(201)));
+        assertThat(response.statusCode(), anyOf(is(200), is(201)));
     }
 
     @Test
-    public void reordenaPlayList()
-    {
+    public void reordenaPlayList() {
         buscaMusicaRequest();
-        String idMusicaPrimeiraPosicao =  response.path("items[0].track.id");
+        String idMusicaPrimeiraPosicao = response.path("items[0].track.id");
         String nomeMusicaPrimeiraPosicao = response.path("items[0].track.name");
         String idMusicaSegundaPosicao = response.path("items[1].track.id");
-        String nomeMusicaSegundaPosica= response.path("items[1].track.name");
+        String nomeMusicaSegundaPosica = response.path("items[1].track.name");
         response = given()
                 .accept("application/json")
                 .contentType("application/json")
-                .header("Authorization" , "Bearer " + token)
+                .header("Authorization", "Bearer " + token)
                 .body("{\"range_start\":0,\"range_length\":1,\"insert_before\":2}")
                 .when()
-                .put(URL + "/playlists/"+ idPlayList +"/tracks")
+                .put(URL + "/playlists/" + idPlayList + "/tracks")
                 .then()
                 .extract()
                 .response();
-        if(response.statusCode() != 401) {
+        if (response.statusCode() != 401) {
             Assert.assertEquals(response.statusCode(), 200);
             buscaMusicaRequest();
             Assert.assertEquals(idMusicaPrimeiraPosicao, response.path("items[1].track.id"));
             Assert.assertEquals(nomeMusicaPrimeiraPosicao, response.path("items[1].track.name"));
             Assert.assertEquals(idMusicaSegundaPosicao, response.path("items[0].track.id"));
             Assert.assertEquals(nomeMusicaSegundaPosica, response.path("items[0].track.name"));
-        }
-        else
-        {
+        } else {
             System.out.println("Usuário não está logado;");
         }
     }
 
+    @Test
+    public void deleteMusica() {
+        buscaMusicaRequest();
+        int quantidadeMusica;
+        if(verificaPorNome(nomeMusicaAdcionada)) {
+            quantidadeMusica = list.size();
+            deleteMusicaRequest(idMusicaDelete);
+        } else {
+            adicionarMusicaResquest(idMusicaDelete);
+            buscaMusicaRequest();
+            quantidadeMusica = list.size();
+            deleteMusicaRequest(idMusicaDelete);
+        }
+        if (response.statusCode() != 401) {
+            Assert.assertEquals(response.statusCode(), 200);
+            buscaMusicaRequest();
+            Assert.assertEquals(list.size(), quantidadeMusica - 1);
+            Assert.assertFalse(verificaPorNome(nomeMusicaAdcionada));
+        } else {
+            System.out.println("Usuário não está logado!");
+        }
+    }
 
-    public Response adicionarMusicaResquest() {
+    public Response adicionarMusicaResquest(String idMusica) {
         Response result;
         result = given()
                 .accept("application/json")
                 .contentType("application/json")
                 .header("Authorization", "Bearer " + token)
-                .body("{\"uris\":[\"spotify:track:6wfK1R6FoLpmUA9lk5ll4T\"]}")
+                .body("{\"uris\":[\"" + idMusica + "\"]}")
                 .when()
                 .post(URL + "/playlists/" + idPlayList + "/tracks")
                 .then()
                 .extract()
                 .response();
+        Assert.assertEquals(result.statusCode(), 201);
         return result;
     }
 
@@ -172,6 +199,19 @@ public class Musicas extends Helper {
         if (response.statusCode() == 200) {
             list = response.path("items.track.name");
         }
+    }
+
+    public void deleteMusicaRequest(String idMusica) {
+        response = given()
+                .accept("application/json")
+                .contentType("application/json")
+                .header("Authorization", "Bearer " + token)
+                .body("{\"tracks\":[{\"uri\":\"" + idMusica + "\"}]}")
+                .when()
+                .delete(URL + "/playlists/" + idPlayList + "/tracks")
+                .then()
+                .extract()
+                .response();
     }
 
     public void retornaIdMusica(String nomeMusica) {
