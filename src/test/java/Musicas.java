@@ -1,5 +1,6 @@
 import io.restassured.response.Response;
 import org.testng.Assert;
+import org.testng.SkipException;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Ignore;
@@ -23,7 +24,7 @@ public class Musicas extends Helper {
     String idMusicaDelete = "spotify:track:6wfK1R6FoLpmUA9lk5ll4T";
 
     @BeforeClass
-    public void buscaIdPlayList() {
+    public void login() {
         playList.retornaIdPlayList(nomePlayList);
     }
 
@@ -36,6 +37,7 @@ public class Musicas extends Helper {
             Assert.assertEquals(response.statusCode(), 200);
         } else {
             System.out.println("Usuário não está logado!");
+            throw new SkipException("Usuário não logado");
         }
     }
 
